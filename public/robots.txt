@@ -1,0 +1,7 @@
+# robots.txt for WHY IT Services
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /admin
+
+Sitemap: https://whyt-services.com/sitemap.xml

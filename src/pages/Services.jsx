@@ -3,11 +3,46 @@ import { Link } from 'react-router-dom';
 import { 
   Compass, Code2, Database, Bot, Server, 
   ArrowRight, CheckCircle2, ShieldCheck, Sparkles, 
-  Zap, Layers, Terminal, Activity, Check, Quote, Sliders
+  Zap, Layers, Terminal, Activity, Check, Quote, Sliders,
+  Clock, Users, DollarSign, Award
 } from 'lucide-react';
 
 export default function Services() {
   const [activeTab, setActiveTab] = useState('digital-strategy');
+  const [teamSize, setTeamSize] = useState(4);
+  const [durationMonths, setDurationMonths] = useState(6);
+
+  // ROI Calculations
+  const traditionalMonthlyRate = 12000; // $12,000 / dev / mo
+  const whyPodMonthlyRate = 4500;       // $4,500 / dev / mo
+  const storyPointsPerDevMo = 25;       // ~25 Story points / dev / mo
+
+  const totalStoryPoints = teamSize * durationMonths * storyPointsPerDevMo;
+  const traditionalTotal = teamSize * durationMonths * traditionalMonthlyRate;
+  const whyPodTotal = teamSize * durationMonths * whyPodMonthlyRate;
+  const savingsTotal = traditionalTotal - whyPodTotal;
+  const savingsPercentage = Math.round((savingsTotal / traditionalTotal) * 100);
+
+  const hiringModels = [
+    {
+      title: 'Dedicated Engineering Teams',
+      badge: 'Full-Time Scale',
+      desc: 'Build your extended tech team with senior full-stack developers, cloud architects, and QA engineers working 100% dedicated to your roadmap.',
+      features: ['Direct Git & Jira integration', 'Daily agile standups', 'Zero HR overhead']
+    },
+    {
+      title: 'Hourly & On-Demand Talent',
+      badge: 'Flexible Hours',
+      desc: 'Access specialized expertise for targeted code reviews, AI model tuning, architecture audits, or emergency bug fixes on an hourly basis.',
+      features: ['Pay-as-you-use flexibility', 'Immediate senior deployment', 'No long-term lock-in']
+    },
+    {
+      title: 'Milestone Fixed-Scope Projects',
+      badge: 'Turnkey Delivery',
+      desc: 'End-to-end custom application buildout with clear milestone deliverables, fixed budgets, defined timelines, and 100% IP ownership.',
+      features: ['Guaranteed delivery scope', 'Dedicated project manager', 'Post-launch 24/7 support']
+    }
+  ];
 
   const services = [
     {
@@ -202,21 +237,22 @@ datacenter_ops:
 
       {/* 2. INTERACTIVE SERVICE PILLARS DEEP-DIVE */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm">
+        <div className="bg-gradient-to-b from-[#F8F3FF] via-white to-[#FAFAFC] border border-[#E9D5FF] rounded-3xl p-6 sm:p-10 shadow-sm">
           
           {/* Pillar Tabs */}
-          <div className="flex flex-wrap gap-2 justify-center mb-8 border-b border-slate-200 pb-6">
+          <div className="flex items-center gap-2 justify-start sm:justify-center overflow-x-auto no-scrollbar py-2 mb-8 border-b border-slate-200/80 pb-6">
             {services.map((s) => {
               const Icon = s.icon;
               const isActive = activeTab === s.id;
               return (
                 <button
                   key={s.id}
+                  type="button"
                   onClick={() => setActiveTab(s.id)}
-                  className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-bold transition-all ${
+                  className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-bold transition-all shrink-0 ${
                     isActive
                       ? 'bg-[#6D28D9] text-white shadow-md'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      : 'bg-white border border-slate-200 text-slate-700 hover:bg-[#F3E8FF] hover:text-[#6D28D9]'
                   }`}
                 >
                   <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-[#6D28D9]'}`} />
@@ -233,7 +269,7 @@ datacenter_ops:
               <div>
                 <span className="text-xs font-bold text-[#6D28D9] uppercase tracking-wider">Pillar Details</span>
                 <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] mt-1">{activeService.title}</h2>
-                <div className="mt-2 inline-flex items-center gap-2 text-xs font-semibold text-purple-700 bg-purple-50 px-3 py-1 rounded-full border border-purple-200">
+                <div className="mt-2 inline-flex items-center gap-2 text-xs font-semibold text-purple-700 bg-[#F3E8FF] px-3.5 py-1.5 rounded-full border border-[#E9D5FF]">
                   <Quote className="w-3.5 h-3.5 text-[#6D28D9]" />
                   <span>{activeService.quote}</span>
                 </div>
@@ -245,7 +281,10 @@ datacenter_ops:
                 <h3 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">Sub-Service Offerings</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {activeService.subServices.map((sub, idx) => (
-                    <div key={idx} className="bg-slate-50 border border-slate-100 p-4 rounded-xl space-y-1">
+                    <div 
+                      key={idx} 
+                      className="bg-gradient-to-b from-[#F3E8FF] via-[#F8F3FF] to-white border border-[#E9D5FF] p-4 rounded-2xl space-y-1 shadow-sm hover:border-[#6D28D9] transition-all"
+                    >
                       <div className="flex items-center gap-2">
                         <CheckCircle2 className="w-4 h-4 text-[#6D28D9] shrink-0" />
                         <h4 className="text-xs font-bold text-[#0F172A]">{sub.name}</h4>
@@ -257,18 +296,23 @@ datacenter_ops:
               </div>
             </div>
 
-            {/* Right Terminal / Architecture Code Box */}
-            <div className="lg:col-span-5 bg-[#0F172A] rounded-2xl overflow-hidden shadow-2xl border border-slate-800">
-              <div className="bg-slate-900 px-4 py-3 border-b border-slate-800 flex items-center justify-between">
-                <span className="text-xs font-mono text-purple-300">{activeService.id}.ts</span>
-                <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded">Corporate Profile V.2</span>
-              </div>
-              <pre className="p-5 font-mono text-xs text-slate-200 overflow-x-auto leading-relaxed">
-                <code>{activeService.codeSnippet}</code>
-              </pre>
-              <div className="bg-slate-900/90 px-4 py-3 border-t border-slate-800/80 text-[11px] text-slate-400 font-mono flex items-center justify-between">
-                <span className="text-purple-300 font-semibold">Leadership Experience: 200+ Years</span>
-                <span className="text-emerald-400">STATUS: READY</span>
+            {/* Right Architecture Image Card */}
+            <div className="lg:col-span-5 relative rounded-3xl overflow-hidden shadow-2xl border border-[#E9D5FF] group">
+              <img 
+                src={
+                  activeService.id === 'digital-strategy' ? 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80' :
+                  activeService.id === 'digital-engineering' ? 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80' :
+                  activeService.id === 'data-engineering' ? 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80' :
+                  activeService.id === 'generative-ai' ? 'https://images.unsplash.com/photo-1677442136019-21780efad99a?auto=format&fit=crop&w=1200&q=80' :
+                  'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80'
+                } 
+                alt={activeService.title} 
+                className="w-full h-80 object-cover transform group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A]/90 via-[#0F172A]/20 to-transparent flex flex-col justify-end p-6 text-white space-y-1">
+                <div className="text-xs font-mono font-bold text-purple-300 uppercase tracking-wider">{activeService.id}</div>
+                <div className="text-base font-extrabold">{activeService.title} Engineering</div>
+                <div className="text-[11px] text-slate-300">Clean code standards & agile pod execution</div>
               </div>
             </div>
 
@@ -277,7 +321,146 @@ datacenter_ops:
         </div>
       </section>
 
-      {/* 3. BOTTOM CTA */}
+      {/* 3. INTERACTIVE ROI & SPRINT VELOCITY CALCULATOR */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="bg-[#0F172A] rounded-3xl p-6 sm:p-10 text-white shadow-2xl border border-slate-800 space-y-8">
+          
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <span className="text-xs font-bold text-purple-400 uppercase tracking-wider">Agile ROI & Output Modeling</span>
+            <h2 className="text-3xl font-extrabold">Sprint Velocity & Cost Calculator</h2>
+            <p className="text-slate-400 text-xs sm:text-sm">Simulate engineering output and financial optimization switching from traditional agency rates to WHY Pods.</p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            
+            {/* Sliders Control Panel */}
+            <div className="lg:col-span-6 space-y-6 bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+              
+              {/* Team Size Slider */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-bold text-slate-300">Dedicated Engineering Pod Size:</span>
+                  <span className="font-mono text-purple-400 font-extrabold text-sm">{teamSize} Engineers</span>
+                </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="20"
+                  value={teamSize}
+                  onChange={(e) => setTeamSize(parseInt(e.target.value))}
+                  className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#6D28D9]"
+                />
+                <div className="flex justify-between text-[10px] font-mono text-slate-500">
+                  <span>1 Engineer</span>
+                  <span>10 Engineers</span>
+                  <span>20 Engineers</span>
+                </div>
+              </div>
+
+              {/* Engagement Duration Slider */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-bold text-slate-300">Roadmap Engagement Duration:</span>
+                  <span className="font-mono text-purple-400 font-extrabold text-sm">{durationMonths} Months</span>
+                </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="12"
+                  value={durationMonths}
+                  onChange={(e) => setDurationMonths(parseInt(e.target.value))}
+                  className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#6D28D9]"
+                />
+                <div className="flex justify-between text-[10px] font-mono text-slate-500">
+                  <span>1 Month</span>
+                  <span>6 Months</span>
+                  <span>12 Months</span>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Live Output Metrics Display */}
+            <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
+              <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-1">
+                <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Estimated Velocity</span>
+                <div className="text-2xl font-extrabold text-purple-400">~{totalStoryPoints.toLocaleString()} SP</div>
+                <span className="text-[11px] text-slate-400">Delivered Story Points</span>
+              </div>
+
+              <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-1">
+                <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Traditional Cost</span>
+                <div className="text-2xl font-extrabold text-slate-400 line-through">${traditionalTotal.toLocaleString()}</div>
+                <span className="text-[11px] text-slate-500">Avg Agency / In-house rate</span>
+              </div>
+
+              <div className="bg-gradient-to-b from-[#6D28D9] to-[#5B21B6] border border-purple-400 p-5 rounded-2xl space-y-1 sm:col-span-2 shadow-lg">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono text-purple-200 uppercase tracking-wider block">WHY Pod Total Cost</span>
+                  <span className="bg-emerald-400 text-slate-950 font-extrabold text-[10px] px-2.5 py-0.5 rounded-full">
+                    SAVE {savingsPercentage}% (${savingsTotal.toLocaleString()})
+                  </span>
+                </div>
+                <div className="text-3xl font-extrabold text-white">${whyPodTotal.toLocaleString()}</div>
+                <p className="text-[11px] text-purple-200 mt-1">Includes senior devs, QA gate, Git/Jira integration, and SOC2 security standards.</p>
+                <Link
+                  to="/contact"
+                  className="mt-3 inline-block w-full bg-white hover:bg-purple-50 text-[#6D28D9] font-bold text-xs py-2.5 rounded-xl text-center shadow-md transition-colors"
+                >
+                  Lock In This Pod Rate
+                </Link>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* 4. FLEXIBLE ENGAGEMENT & HIRING MODELS */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <span className="text-xs font-bold text-[#6D28D9] uppercase tracking-wider">Flexible Engagement Options</span>
+          <h2 className="text-3xl font-extrabold text-[#0F172A] mt-1">Hire Senior IT Developers & Teams</h2>
+          <p className="text-slate-600 text-sm mt-2">Tailored engagement structures to suit your budget, technical roadmap, and scaling speed.</p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {hiringModels.map((model, idx) => (
+            <div 
+              key={idx}
+              className="bg-gradient-to-b from-[#F3E8FF] via-[#F8F3FF] to-white border border-[#E9D5FF] p-6 sm:p-8 rounded-3xl shadow-sm hover:border-[#6D28D9] transition-all flex flex-col justify-between space-y-6"
+            >
+              <div className="space-y-4">
+                <span className="inline-block bg-[#6D28D9] text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
+                  {model.badge}
+                </span>
+                <h3 className="text-xl font-extrabold text-[#0F172A]">{model.title}</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">{model.desc}</p>
+                <div className="space-y-2 pt-2">
+                  {model.features.map((feat, fIdx) => (
+                    <div key={fIdx} className="flex items-center gap-2 text-xs font-semibold text-slate-700">
+                      <Check className="w-4 h-4 text-[#6D28D9]" />
+                      <span>{feat}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <Link
+                to="/contact"
+                className="w-full bg-[#6D28D9] hover:bg-[#5B21B6] text-white text-xs font-bold py-3 rounded-xl text-center transition-all shadow-md block"
+              >
+                Inquire About {model.title}
+              </Link>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 5. BOTTOM CTA */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-gradient-to-r from-[#5B21B6] via-[#6D28D9] to-[#4C1D95] rounded-3xl p-8 sm:p-12 text-white shadow-xl text-center">
           <h2 className="text-3xl font-extrabold mb-4">Need Tailored Service Engineering for Your Company?</h2>
@@ -296,3 +479,4 @@ datacenter_ops:
     </div>
   );
 }
+

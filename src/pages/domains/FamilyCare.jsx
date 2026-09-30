@@ -58,10 +58,10 @@ export default function FamilyCare() {
                 alt="Family Companion Care Tech"
                 className="w-full h-80 sm:h-96 object-cover group-hover:scale-105 transition-transform duration-700"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-transparent to-transparent opacity-80" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/70 to-transparent" />
               <div className="absolute bottom-6 left-6 right-6 text-white space-y-1">
                 <span className="text-[10px] font-mono text-purple-300 font-bold uppercase tracking-wider">Assistive Care Telemetry</span>
-                <h3 className="text-lg font-bold">WHY Companion Care Platform</h3>
+                <h3 className="text-lg font-bold text-white">WHY Companion Care Platform</h3>
                 <p className="text-xs text-slate-300">Real-time GPS dispatch & encrypted family vital logs.</p>
               </div>
             </div>
@@ -129,7 +129,7 @@ export default function FamilyCare() {
       {/* 5. CTA */}
       <section className="bg-gradient-to-r from-[#5B21B6] via-[#6D28D9] to-[#4C1D95] text-white py-16 text-center">
         <div className="max-w-4xl mx-auto px-4 space-y-4">
-          <h2 className="text-3xl font-extrabold">Interested in Deploying Family Care Solutions?</h2>
+          <h2 className="text-3xl font-extrabold text-white">Interested in Deploying Family Care Solutions?</h2>
           <p className="text-xs text-purple-100">Talk to our healthcare digital engineering leads today for a custom architecture review.</p>
           <Link to="/contact" className="inline-block bg-white text-[#6D28D9] font-extrabold text-xs px-8 py-4 rounded-xl uppercase shadow-md hover:bg-purple-50 transition-colors">
             Contact Health Tech Team -&gt;

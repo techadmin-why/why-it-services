@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, Calendar, ArrowRight, MapPin, Play, Building } from 'lucide-react';
+import { Sparkles, Calendar, ArrowRight, MapPin, Building } from 'lucide-react';
 
 const defaultNewsArticles = [
   {
@@ -51,17 +51,28 @@ export default function NewsPage() {
   const [articles, setArticles] = useState([]);
 
   useEffect(() => {
-    const isInitialized = localStorage.getItem('why_news_initialized');
-    const storedRaw = localStorage.getItem('why_news_articles');
-    const stored = storedRaw !== null ? JSON.parse(storedRaw) : null;
+    async function loadNews() {
+      try {
+        const res = await fetch('http://localhost:4000/api/v1/public/news');
+        const data = await res.json();
+        if (data && data.success && Array.isArray(data.data) && data.data.length > 0) {
+          setArticles(data.data);
+          return;
+        }
+      } catch (err) {
+        console.warn('Backend news API unavailable, falling back to local storage:', err.message);
+      }
 
-    if (stored === null && !isInitialized) {
-      localStorage.setItem('why_news_articles', JSON.stringify(defaultNewsArticles));
-      localStorage.setItem('why_news_initialized', 'true');
-      setArticles(defaultNewsArticles.filter(a => a.status === 'Published'));
-    } else {
-      setArticles((stored || []).filter(a => a.status === 'Published'));
+      const storedRaw = localStorage.getItem('why_news_articles');
+      const stored = storedRaw !== null ? JSON.parse(storedRaw) : null;
+      if (stored === null) {
+        localStorage.setItem('why_news_articles', JSON.stringify(defaultNewsArticles));
+        setArticles(defaultNewsArticles.filter(a => a.status === 'Published'));
+      } else {
+        setArticles((stored || []).filter(a => a.status === 'Published'));
+      }
     }
+    loadNews();
   }, []);
 
   const featuredArticle = articles.find(a => a.isFeatured) || articles[0] || null;
@@ -88,8 +99,8 @@ export default function NewsPage() {
         {/* Featured Press Release Card */}
         {featuredArticle && (
           <div className="bg-gradient-to-br from-[#F8F3FF] via-white to-[#F3E8FF] border border-[#E9D5FF] rounded-3xl p-6 sm:p-10 shadow-lg space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="inline-flex items-center gap-2 bg-[#6D28D9] text-white px-3.5 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+              <div className="inline-flex items-center gap-2 bg-[#6D28D9] text-white px-3.5 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider shadow-sm shrink-0">
                 FEATURED NEWS
               </div>
               <span className="text-xs text-purple-700 font-bold">{featuredArticle.category} • {featuredArticle.date}</span>
@@ -104,29 +115,24 @@ export default function NewsPage() {
                 <img
                   src={featuredArticle.image || 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80'}
                   alt={featuredArticle.title}
-                  className="w-full h-[260px] sm:h-[340px] object-cover group-hover:scale-105 transition-transform duration-700"
+                  className="w-full h-[240px] sm:h-[340px] object-cover group-hover:scale-105 transition-transform duration-700"
                 />
-                {featuredArticle.videoUrl && (
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A]/80 via-transparent to-transparent flex items-center justify-center">
-                    <div className="w-16 h-16 rounded-full bg-[#6D28D9] text-white flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
-                      <Play className="w-7 h-7 text-white fill-white ml-1" />
-                    </div>
-                  </div>
-                )}
               </div>
 
               <div className="lg:col-span-5 space-y-6">
-                <p className="text-sm text-slate-700 leading-relaxed">
+                <p className="text-sm text-slate-700 leading-relaxed font-normal">
                   {featuredArticle.summary}
                 </p>
 
-                <Link
-                  to={`/about/news/${featuredArticle.slug || featuredArticle.id}`}
-                  className="bg-[#6D28D9] hover:bg-[#5B21B6] text-white text-xs font-extrabold px-7 py-3.5 rounded-xl uppercase tracking-wider transition-all shadow-md inline-flex items-center gap-2"
-                >
-                  <span>Read the press release</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
+                <div className="pt-2">
+                  <Link
+                    to={`/about/news/${featuredArticle.slug || featuredArticle.id}`}
+                    className="w-full sm:w-auto bg-[#6D28D9] hover:bg-[#5B21B6] text-white text-xs sm:text-sm font-extrabold px-6 py-4 rounded-xl uppercase tracking-wider transition-all shadow-md flex sm:inline-flex items-center justify-center gap-2.5 text-center active:scale-98"
+                  >
+                    <span>Read the press release</span>
+                    <ArrowRight className="w-4 h-4 shrink-0" />
+                  </Link>
+                </div>
               </div>
             </div>
           </div>

@@ -3,25 +3,12 @@ import { Link } from 'react-router-dom';
 import { 
   Compass, Code2, Database, Bot, Server, 
   ArrowRight, CheckCircle2, ShieldCheck, Sparkles, 
-  Zap, Layers, Terminal, Activity, Check, Quote, Sliders,
-  Clock, Users, DollarSign, Award
+  Zap, Layers, Terminal, Activity, Check, Quote,
+  Clock, Users, Award
 } from 'lucide-react';
 
 export default function Services() {
   const [activeTab, setActiveTab] = useState('digital-strategy');
-  const [teamSize, setTeamSize] = useState(4);
-  const [durationMonths, setDurationMonths] = useState(6);
-
-  // ROI Calculations
-  const traditionalMonthlyRate = 12000; // $12,000 / dev / mo
-  const whyPodMonthlyRate = 4500;       // $4,500 / dev / mo
-  const storyPointsPerDevMo = 25;       // ~25 Story points / dev / mo
-
-  const totalStoryPoints = teamSize * durationMonths * storyPointsPerDevMo;
-  const traditionalTotal = teamSize * durationMonths * traditionalMonthlyRate;
-  const whyPodTotal = teamSize * durationMonths * whyPodMonthlyRate;
-  const savingsTotal = traditionalTotal - whyPodTotal;
-  const savingsPercentage = Math.round((savingsTotal / traditionalTotal) * 100);
 
   const hiringModels = [
     {
@@ -321,103 +308,7 @@ datacenter_ops:
         </div>
       </section>
 
-      {/* 3. INTERACTIVE ROI & SPRINT VELOCITY CALCULATOR */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-[#0F172A] rounded-3xl p-6 sm:p-10 text-white shadow-2xl border border-slate-800 space-y-8">
-          
-          <div className="text-center max-w-2xl mx-auto space-y-2">
-            <span className="text-xs font-bold text-purple-400 uppercase tracking-wider">Agile ROI & Output Modeling</span>
-            <h2 className="text-3xl font-extrabold">Sprint Velocity & Cost Calculator</h2>
-            <p className="text-slate-400 text-xs sm:text-sm">Simulate engineering output and financial optimization switching from traditional agency rates to WHY Pods.</p>
-          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            
-            {/* Sliders Control Panel */}
-            <div className="lg:col-span-6 space-y-6 bg-slate-900 border border-slate-800 p-6 rounded-2xl">
-              
-              {/* Team Size Slider */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="font-bold text-slate-300">Dedicated Engineering Pod Size:</span>
-                  <span className="font-mono text-purple-400 font-extrabold text-sm">{teamSize} Engineers</span>
-                </div>
-                <input
-                  type="range"
-                  min="1"
-                  max="20"
-                  value={teamSize}
-                  onChange={(e) => setTeamSize(parseInt(e.target.value))}
-                  className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#6D28D9]"
-                />
-                <div className="flex justify-between text-[10px] font-mono text-slate-500">
-                  <span>1 Engineer</span>
-                  <span>10 Engineers</span>
-                  <span>20 Engineers</span>
-                </div>
-              </div>
-
-              {/* Engagement Duration Slider */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="font-bold text-slate-300">Roadmap Engagement Duration:</span>
-                  <span className="font-mono text-purple-400 font-extrabold text-sm">{durationMonths} Months</span>
-                </div>
-                <input
-                  type="range"
-                  min="1"
-                  max="12"
-                  value={durationMonths}
-                  onChange={(e) => setDurationMonths(parseInt(e.target.value))}
-                  className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#6D28D9]"
-                />
-                <div className="flex justify-between text-[10px] font-mono text-slate-500">
-                  <span>1 Month</span>
-                  <span>6 Months</span>
-                  <span>12 Months</span>
-                </div>
-              </div>
-
-            </div>
-
-            {/* Live Output Metrics Display */}
-            <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              
-              <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-1">
-                <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Estimated Velocity</span>
-                <div className="text-2xl font-extrabold text-purple-400">~{totalStoryPoints.toLocaleString()} SP</div>
-                <span className="text-[11px] text-slate-400">Delivered Story Points</span>
-              </div>
-
-              <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-1">
-                <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Traditional Cost</span>
-                <div className="text-2xl font-extrabold text-slate-400 line-through">${traditionalTotal.toLocaleString()}</div>
-                <span className="text-[11px] text-slate-500">Avg Agency / In-house rate</span>
-              </div>
-
-              <div className="bg-gradient-to-b from-[#6D28D9] to-[#5B21B6] border border-purple-400 p-5 rounded-2xl space-y-1 sm:col-span-2 shadow-lg">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono text-purple-200 uppercase tracking-wider block">WHY Pod Total Cost</span>
-                  <span className="bg-emerald-400 text-slate-950 font-extrabold text-[10px] px-2.5 py-0.5 rounded-full">
-                    SAVE {savingsPercentage}% (${savingsTotal.toLocaleString()})
-                  </span>
-                </div>
-                <div className="text-3xl font-extrabold text-white">${whyPodTotal.toLocaleString()}</div>
-                <p className="text-[11px] text-purple-200 mt-1">Includes senior devs, QA gate, Git/Jira integration, and SOC2 security standards.</p>
-                <Link
-                  to="/contact"
-                  className="mt-3 inline-block w-full bg-white hover:bg-purple-50 text-[#6D28D9] font-bold text-xs py-2.5 rounded-xl text-center shadow-md transition-colors"
-                >
-                  Lock In This Pod Rate
-                </Link>
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-      </section>
 
       {/* 4. FLEXIBLE ENGAGEMENT & HIRING MODELS */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

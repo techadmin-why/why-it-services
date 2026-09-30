@@ -1,0 +1,16 @@
+# Server Dependencies
+node_modules/
+
+# Environment Secrets
+.env
+.env.local
+.env.production
+!.env.example
+
+# File Uploads
+uploads/
+private_uploads/
+
+# Logs
+*.log
+logs/

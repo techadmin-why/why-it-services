@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+server/node_modules/
+
+# Local Environment Variables & Secret Files
+.env
+.env.*
+!.env.example
+server/.env
+server/.env.*
+!server/.env.example
+
+# Build Outputs
+dist/
+build/
+
+# Uploads & User Generated Files
+uploads/
+private_uploads/
+server/uploads/
+server/private_uploads/
+
+# Logs & Temporary Files
+*.log
+logs/
+server/logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE & OS Files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

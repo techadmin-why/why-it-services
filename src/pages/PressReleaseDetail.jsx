@@ -159,17 +159,14 @@ export default function PressReleaseDetail() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
         {/* Top Back Navigation Link */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-start pb-2">
           <Link 
             to="/about/news"
-            className="inline-flex items-center gap-2 text-xs font-bold text-[#6D28D9] hover:underline bg-[#F3E8FF] px-3.5 py-1.5 rounded-full border border-[#E9D5FF] transition-all"
+            className="inline-flex items-center gap-2 text-xs sm:text-sm font-extrabold text-[#6D28D9] hover:text-[#5B21B6] bg-[#F3E8FF] hover:bg-[#E9D5FF] px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl border border-[#E9D5FF] transition-all shadow-sm group"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
+            <ArrowLeft className="w-4 h-4 text-[#6D28D9] group-hover:-translate-x-0.5 transition-transform" />
             <span>Back to All News & Press Releases</span>
           </Link>
-          <span className="text-[10px] font-mono text-slate-400 bg-slate-100 px-3 py-1 rounded-lg border border-slate-200">
-            Permalink: /about/news/{article.slug || article.id}
-          </span>
         </div>
 
         {/* Article Header */}
@@ -225,7 +222,7 @@ export default function PressReleaseDetail() {
               alt={article.title}
               className="w-full h-[280px] sm:h-[420px] object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A]/85 via-transparent to-transparent flex items-end p-6 text-white justify-between">
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/70 to-transparent flex items-end p-6 text-white justify-between">
               <div>
                 <span className="text-[10px] font-mono text-purple-300 font-bold uppercase tracking-wider block">WHY IT Services Global Newsroom</span>
                 <h3 className="text-base sm:text-xl font-extrabold">{article.title}</h3>

@@ -119,10 +119,10 @@ export default function InfrastructureServices() {
                 alt="Cloud Infrastructure Operations"
                 className="w-full h-80 sm:h-96 object-cover group-hover:scale-105 transition-transform duration-700"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-transparent to-transparent opacity-80" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/70 to-transparent" />
               <div className="absolute bottom-6 left-6 right-6 text-white space-y-1">
                 <span className="text-[10px] font-mono text-purple-300 font-bold uppercase tracking-wider">Multi-Cloud Operations</span>
-                <h3 className="text-lg font-bold">AWS, Azure & Kubernetes (EKS/GKE)</h3>
+                <h3 className="text-lg font-bold text-white">AWS, Azure & Kubernetes (EKS/GKE)</h3>
                 <p className="text-xs text-slate-300">24/7 SRE monitoring, zero-downtime CI/CD & FinOps cost optimization.</p>
               </div>
             </div>
@@ -232,7 +232,7 @@ export default function InfrastructureServices() {
       {/* 8. CTA SECTION */}
       <section className="bg-gradient-to-r from-[#5B21B6] via-[#6D28D9] to-[#4C1D95] text-white py-16">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-          <h2 className="text-3xl sm:text-4xl font-extrabold">Ensure Zero-Downtime Infrastructure Performance</h2>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white">Ensure Zero-Downtime Infrastructure Performance</h2>
           <p className="text-purple-100 text-sm max-w-xl mx-auto">Talk to our Site Reliability Engineers and optimize your cloud operations today.</p>
           <div>
             <Link

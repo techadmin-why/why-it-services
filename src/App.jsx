@@ -5,6 +5,7 @@ import Breadcrumbs from './components/Breadcrumbs';
 import Footer from './components/Footer';
 import CookieBanner from './components/CookieBanner';
 import ScrollToTop from './components/ScrollToTop';
+import { AuthProvider } from './context/AuthContext';
 
 // Static imports for initial landing page to maintain instant FCP
 import Home from './pages/Home';
@@ -58,76 +59,76 @@ export default function App() {
   const location = useLocation();
   const isAdmin = location.pathname.startsWith('/admin');
 
-  if (isAdmin) {
-    return (
-      <div className="min-h-screen bg-[#0F172A] font-sans antialiased selection:bg-[#6D28D9] selection:text-white">
-        <ScrollToTop />
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route path="/admin/*" element={<Admin />} />
-          </Routes>
-        </Suspense>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-[#FAFAFC] text-[#0F172A] font-sans antialiased selection:bg-[#F3E8FF] selection:text-[#6D28D9]">
-      <a 
-        href="#main-content" 
-        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-[#6D28D9] focus:text-white focus:rounded-lg focus:shadow-xl font-bold text-xs"
-      >
-        Skip to main content
-      </a>
-      <ScrollToTop />
-      <div>
-        <Navbar />
-        <Breadcrumbs />
-        <main id="main-content" className="focus:outline-none" tabIndex={-1}>
+    <AuthProvider>
+      {isAdmin ? (
+        <div className="min-h-screen bg-[#0F172A] font-sans antialiased selection:bg-[#6D28D9] selection:text-white">
+          <ScrollToTop />
           <Suspense fallback={<PageLoader />}>
             <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/services" element={<Services />} />
-              <Route path="/services/digital-strategy" element={<DigitalStrategy />} />
-              <Route path="/services/digital-engineering" element={<DigitalEngineering />} />
-              <Route path="/services/data-engineering" element={<DataEngineering />} />
-              <Route path="/services/generative-ai" element={<GenerativeAI />} />
-              <Route path="/services/infrastructure-services" element={<InfrastructureServices />} />
-              <Route path="/solutions" element={<Solutions />} />
-              <Route path="/solutions/family-care" element={<FamilyCare />} />
-              <Route path="/solutions/healthcare" element={<HealthcareDomain />} />
-              <Route path="/solutions/fintech" element={<FintechDomain />} />
-              <Route path="/solutions/saas" element={<SaasDomain />} />
-              <Route path="/solutions/ecommerce" element={<EcommerceDomain />} />
-              <Route path="/solutions/logistics" element={<LogisticsDomain />} />
-              <Route path="/solutions/education" element={<EducationDomain />} />
-              <Route path="/solutions/real-estate" element={<RealEstateDomain />} />
-              <Route path="/solutions/manufacturing" element={<ManufacturingDomain />} />
-              <Route path="/hire" element={<HireDevelopers />} />
-              <Route path="/case-studies" element={<CaseStudies />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/reserve-spot" element={<ReserveSpot />} />
-              <Route path="/schedule-discovery" element={<ScheduleDiscovery />} />
-              <Route path="/privacy" element={<PrivacyPolicy />} />
-              <Route path="/terms" element={<TermsOfService />} />
-              <Route path="/security" element={<SecurityStatement />} />
-              <Route path="/careers" element={<Careers />} />
-              <Route path="/trust" element={<TrustSafety />} />
-              <Route path="/trust-safety" element={<TrustSafety />} />
-              <Route path="/faq" element={<FAQPage />} />
-              <Route path="/insights" element={<NewsPage />} />
-              <Route path="/about/news" element={<NewsPage />} />
-              <Route path="/about/news/:slug" element={<PressReleaseDetail />} />
-              <Route path="/news" element={<NewsPage />} />
-              <Route path="/news/:slug" element={<PressReleaseDetail />} />
-              <Route path="*" element={<NotFound />} />
+              <Route path="/admin/*" element={<Admin />} />
             </Routes>
           </Suspense>
-        </main>
-      </div>
-      <Footer />
-      <CookieBanner />
-    </div>
+        </div>
+      ) : (
+        <div className="min-h-screen flex flex-col justify-between bg-[#FAFAFC] text-[#0F172A] font-sans antialiased selection:bg-[#F3E8FF] selection:text-[#6D28D9] overflow-x-clip w-full max-w-full relative">
+          <a 
+            href="#main-content" 
+            className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-[#6D28D9] focus:text-white focus:rounded-lg focus:shadow-xl font-bold text-xs"
+          >
+            Skip to main content
+          </a>
+          <ScrollToTop />
+          <div>
+            <Navbar />
+            <Breadcrumbs />
+            <main id="main-content" className="focus:outline-none" tabIndex={-1}>
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/services" element={<Services />} />
+                  <Route path="/services/digital-strategy" element={<DigitalStrategy />} />
+                  <Route path="/services/digital-engineering" element={<DigitalEngineering />} />
+                  <Route path="/services/data-engineering" element={<DataEngineering />} />
+                  <Route path="/services/generative-ai" element={<GenerativeAI />} />
+                  <Route path="/services/infrastructure-services" element={<InfrastructureServices />} />
+                  <Route path="/solutions" element={<Solutions />} />
+                  <Route path="/solutions/family-care" element={<FamilyCare />} />
+                  <Route path="/solutions/healthcare" element={<HealthcareDomain />} />
+                  <Route path="/solutions/fintech" element={<FintechDomain />} />
+                  <Route path="/solutions/saas" element={<SaasDomain />} />
+                  <Route path="/solutions/ecommerce" element={<EcommerceDomain />} />
+                  <Route path="/solutions/logistics" element={<LogisticsDomain />} />
+                  <Route path="/solutions/education" element={<EducationDomain />} />
+                  <Route path="/solutions/real-estate" element={<RealEstateDomain />} />
+                  <Route path="/solutions/manufacturing" element={<ManufacturingDomain />} />
+                  <Route path="/hire" element={<HireDevelopers />} />
+                  <Route path="/case-studies" element={<CaseStudies />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/reserve-spot" element={<ReserveSpot />} />
+                  <Route path="/schedule-discovery" element={<ScheduleDiscovery />} />
+                  <Route path="/privacy" element={<PrivacyPolicy />} />
+                  <Route path="/terms" element={<TermsOfService />} />
+                  <Route path="/security" element={<SecurityStatement />} />
+                  <Route path="/careers" element={<Careers />} />
+                  <Route path="/trust" element={<TrustSafety />} />
+                  <Route path="/trust-safety" element={<TrustSafety />} />
+                  <Route path="/faq" element={<FAQPage />} />
+                  <Route path="/insights" element={<NewsPage />} />
+                  <Route path="/about/news" element={<NewsPage />} />
+                  <Route path="/about/news/:slug" element={<PressReleaseDetail />} />
+                  <Route path="/news" element={<NewsPage />} />
+                  <Route path="/news/:slug" element={<PressReleaseDetail />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+            </main>
+          </div>
+          <Footer />
+          <CookieBanner />
+        </div>
+      )}
+    </AuthProvider>
   );
 }

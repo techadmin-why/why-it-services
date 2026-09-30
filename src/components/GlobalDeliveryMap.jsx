@@ -3,7 +3,7 @@ import { Globe, MapPin, ShieldCheck, Cpu, Clock, Users, ArrowRight, ExternalLink
 import { Link } from 'react-router-dom';
 
 export default function GlobalDeliveryMap() {
-  const googleMapsUrl = "https://www.google.com/maps/search/?api=1&query=WHY+Services+India+Private+Limited+1st+Floor+No+14/1+Balaji+Krupa+2nd+Main+Road+Seshadripuram+Bengaluru+560020";
+  const googleMapsUrl = "https://maps.app.goo.gl/TBWPpqZDwFBvMyF98";
 
   return (
     <div className="bg-gradient-to-br from-[#0F172A] via-[#1E1B4B] to-[#0F172A] text-white rounded-3xl p-6 sm:p-10 shadow-2xl border border-slate-800 my-12">

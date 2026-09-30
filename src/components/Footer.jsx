@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 
 export default function Footer() {
-  const googleMapsUrl = "https://www.google.com/maps/search/?api=1&query=WHY+Services+India+Private+Limited+1st+Floor+No+14/1+Balaji+Krupa+2nd+Main+Road+Seshadripuram+Bengaluru+560020";
+  const googleMapsUrl = "https://maps.app.goo.gl/TBWPpqZDwFBvMyF98";
 
   const [openSection, setOpenSection] = useState({
     services: false,
@@ -46,12 +46,12 @@ export default function Footer() {
             </p>
 
             {/* Direct Contact Coordinates */}
-            <div className="space-y-3 pt-2 text-xs text-slate-300">
+            <div className="space-y-2.5 pt-2 text-xs text-slate-300">
               
               {/* Phone */}
               <a 
                 href="tel:+919090254343" 
-                className="flex items-start gap-3 p-2 rounded-xl hover:bg-slate-800/60 transition-colors group"
+                className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-800/60 transition-colors group"
               >
                 <div className="w-8 h-8 rounded-lg bg-slate-800 text-purple-400 flex items-center justify-center shrink-0 border border-slate-700 group-hover:bg-[#6D28D9] group-hover:text-white transition-colors">
                   <Phone className="w-4 h-4" />
@@ -62,33 +62,16 @@ export default function Footer() {
                 </div>
               </a>
 
-              {/* WhatsApp */}
-              <a 
-                href="https://wa.me/919090254343" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="flex items-start gap-3 p-2 rounded-xl hover:bg-slate-800/60 transition-colors group"
-              >
-                <div className="w-8 h-8 rounded-lg bg-emerald-950 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-800/50 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                  <MessageSquare className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="font-bold text-emerald-400 group-hover:text-emerald-300 transition-colors">Book via WhatsApp</div>
-                  <div className="text-[10px] text-slate-400">+91 90902 54343</div>
-                </div>
-              </a>
-
               {/* Email */}
               <a 
                 href="mailto:info@thewhyservices.com" 
-                className="flex items-start gap-3 p-2 rounded-xl hover:bg-slate-800/60 transition-colors group"
+                className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-800/60 transition-colors group"
               >
                 <div className="w-8 h-8 rounded-lg bg-slate-800 text-purple-400 flex items-center justify-center shrink-0 border border-slate-700 group-hover:bg-[#6D28D9] group-hover:text-white transition-colors">
                   <Mail className="w-4 h-4" />
                 </div>
                 <div>
                   <div className="font-bold text-white group-hover:text-purple-300 transition-colors">info@thewhyservices.com</div>
-                  <div className="text-[10px] text-slate-400">contact@thewhyservices.com</div>
                 </div>
               </a>
 
@@ -132,7 +115,7 @@ export default function Footer() {
               <li><Link to="/services/digital-engineering" className="hover:text-purple-400 transition-colors block">Digital & Web Engineering</Link></li>
               <li><Link to="/services/digital-strategy" className="hover:text-purple-400 transition-colors block">Digital Strategy & Experience</Link></li>
               <li><Link to="/services/data-engineering" className="hover:text-purple-400 transition-colors block">Data Engineering & Analytics</Link></li>
-              <li><Link to="/services/generative-ai" className="hover:text-purple-400 transition-colors font-bold text-purple-300 block">Generative AI & LLMs</Link></li>
+              <li><Link to="/services/generative-ai" className="hover:text-purple-400 transition-colors block">Generative AI & LLMs</Link></li>
               <li><Link to="/services/infrastructure-services" className="hover:text-purple-400 transition-colors block">Cloud Infrastructure & 24/7 Managed Ops</Link></li>
               <li><Link to="/hire" className="hover:text-purple-400 transition-colors block">Hire Dedicated Engineering Squads</Link></li>
             </ul>
@@ -170,9 +153,9 @@ export default function Footer() {
               <ChevronDown className={`w-4 h-4 text-purple-400 transition-transform lg:hidden ${openSection.company ? 'rotate-180' : ''}`} />
             </button>
             <ul className={`space-y-2 text-xs text-slate-300 pt-3 transition-all ${openSection.company ? 'block' : 'hidden lg:block'}`}>
-              <li><Link to="/about" className="hover:text-purple-400 transition-colors block font-bold">About Us</Link></li>
-              <li><Link to="/hire" className="hover:text-purple-400 transition-colors block font-bold text-purple-300">Hire Dedicated Developers</Link></li>
-              <li><Link to="/about/news" className="hover:text-purple-400 transition-colors block font-bold text-purple-300">News & Press Releases</Link></li>
+              <li><Link to="/about" className="hover:text-purple-400 transition-colors block">About Us</Link></li>
+              <li><Link to="/hire" className="hover:text-purple-400 transition-colors block">Hire Dedicated Developers</Link></li>
+              <li><Link to="/about/news" className="hover:text-purple-400 transition-colors block">News & Press Releases</Link></li>
               <li><Link to="/case-studies" className="hover:text-purple-400 transition-colors block">Case Studies Showcase</Link></li>
               <li><Link to="/careers" className="hover:text-purple-400 transition-colors block">Careers</Link></li>
               <li><Link to="/contact" className="hover:text-purple-400 transition-colors block">Contact Us</Link></li>

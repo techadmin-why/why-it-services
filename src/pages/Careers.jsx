@@ -1,17 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Briefcase, ArrowRight, Sparkles, CheckCircle2, Upload, FileText, UserCheck, X } from 'lucide-react';
+import { getPublicJobs, submitJobApplication } from '../api/client';
 
 export default function Careers() {
   const [selectedJob, setSelectedJob] = useState(null);
   const [applyModalJob, setApplyModalJob] = useState(null);
   const [authTab, setAuthTab] = useState('apply'); // 'apply' | 'login'
   const [candidateForm, setCandidateForm] = useState({
-    name: '', email: '', phone: '', experience: '3-5 years', coverLetter: '', resumeFileName: '', resumeDataUrl: null
+    name: '', email: '', phone: '', experience: '3-5 years', coverLetter: '', resumeFileName: ''
   });
+  const [selectedFile, setSelectedFile] = useState(null);
   const [appliedSuccess, setAppliedSuccess] = useState(false);
   const [appRefId, setAppRefId] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(null);
 
-  React.useEffect(() => {
+  const [openPositions, setOpenPositions] = useState([]);
+  const [jobsLoading, setJobsLoading] = useState(true);
+  const [jobsError, setJobsError] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchJobs() {
+      setJobsLoading(true);
+      setJobsError(null);
+      try {
+        const response = await getPublicJobs();
+        if (isMounted) {
+          const jobsList = Array.isArray(response?.data) ? response.data : (Array.isArray(response?.data?.jobs) ? response.data.jobs : []);
+          if (response && response.success && jobsList.length > 0) {
+            const mappedJobs = jobsList.map(j => ({
+              id: j.id,
+              slug: j.slug || j.id,
+              title: j.title,
+              dept: j.department || 'Engineering',
+              type: j.employment_type || j.type || 'Full-Time',
+              location: j.location || 'Bengaluru / Hybrid',
+              overview: j.summary || j.overview || '',
+              responsibilities: Array.isArray(j.responsibilities) 
+                ? j.responsibilities 
+                : (typeof j.responsibilities === 'string' ? JSON.parse(j.responsibilities || '[]') : [])
+            }));
+            setOpenPositions(mappedJobs);
+          } else {
+            setOpenPositions([]);
+          }
+        }
+      } catch (err) {
+        if (isMounted) {
+          setOpenPositions([]);
+          setJobsError('Unable to load career positions at this time. Please try again later.');
+        }
+      } finally {
+        if (isMounted) setJobsLoading(false);
+      }
+    }
+    fetchJobs();
+    return () => { isMounted = false; };
+  }, []);
+
+  useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         setApplyModalJob(null);
@@ -21,109 +69,61 @@ export default function Careers() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const openPositions = [
-    {
-      id: 'job-1',
-      title: 'Senior Full Stack Engineer (React / Node.js)',
-      dept: 'Digital Engineering',
-      type: 'Full-Time',
-      location: 'Bengaluru / Hybrid',
-      overview: 'We are seeking a Senior Full Stack Engineer with 4+ years of experience building high-scale React and Node.js enterprise microservices.',
-      responsibilities: [
-        'Design and implement high-performance React user interfaces and Node.js REST/GraphQL APIs.',
-        'Collaborate with cloud architects to maintain high test coverage and zero-downtime CI/CD deployments.',
-        'Optimize database schemas across PostgreSQL and MongoDB.'
-      ]
-    },
-    {
-      id: 'job-2',
-      title: 'Lead Data Pipeline Architect (ETL / Data Lakes)',
-      dept: 'Data Engineering',
-      type: 'Full-Time',
-      location: 'Bengaluru / Remote',
-      overview: 'Lead our data engineering pod in building real-time Apache Spark and Snowflake data lakes for Fortune enterprise clients.',
-      responsibilities: [
-        'Architect streaming ETL/ELT data pipelines using Python, dbt, and Kafka.',
-        'Implement enterprise GRC data governance, RBAC security, and PII masking.',
-        'Tune Snowflake and BigQuery query speeds for real-time executive dashboarding.'
-      ]
-    },
-    {
-      id: 'job-3',
-      title: 'Generative AI & LLM Specialist',
-      dept: 'Artificial Intelligence',
-      type: 'Full-Time',
-      location: 'Bengaluru / Hybrid',
-      overview: 'Develop custom RAG architectures, fine-tune open-source LLMs (Llama 3, Mistral), and build autonomous multi-agent systems.',
-      responsibilities: [
-        'Implement hybrid vector search retrieval (Pinecone, Qdrant, pgvector).',
-        'Fine-tune domain models on private enterprise data inside air-gapped cloud VPCs.',
-        'Build guardrails for PII redaction and anti-hallucination verification loops.'
-      ]
-    },
-    {
-      id: 'job-4',
-      title: 'Cloud Infrastructure & SRE Lead (AWS / K8s)',
-      dept: 'Infrastructure Managed Services',
-      type: 'Full-Time',
-      location: 'Bengaluru / Office',
-      overview: 'Manage 24/7 cloud operations, Kubernetes container clusters, and FinOps cost optimization programs.',
-      responsibilities: [
-        'Standardize multi-cloud environments using Terraform Infrastructure-as-Code.',
-        'Ensure 99.99% system availability with Datadog / Prometheus telemetry.',
-        'Execute quarterly FinOps cloud cost reduction audits.'
-      ]
-    }
-  ];
-
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setCandidateForm({ 
-          ...candidateForm, 
-          resumeFileName: file.name,
-          resumeDataUrl: event.target.result 
-        });
-      };
-      reader.readAsDataURL(file);
+      setSelectedFile(file);
+      setCandidateForm(prev => ({ 
+        ...prev, 
+        resumeFileName: file.name
+      }));
     }
   };
 
-  const handleApplySubmit = (e) => {
+  const handleApplySubmit = async (e) => {
     e.preventDefault();
-    const generatedRef = `WHY-APP-${Math.floor(100000 + Math.random() * 900000)}`;
-    setAppRefId(generatedRef);
-    setAppliedSuccess(true);
-    
-    // Save application to localStorage for Admin Panel access
-    const newApp = {
-      id: Date.now(),
-      refId: generatedRef,
-      jobId: applyModalJob.id,
-      jobTitle: applyModalJob.title,
-      dept: applyModalJob.dept,
-      candidateName: candidateForm.name,
-      name: candidateForm.name,
-      email: candidateForm.email,
-      phone: candidateForm.phone || 'N/A',
-      experience: candidateForm.experience,
-      coverLetter: candidateForm.coverLetter || '',
-      resumeFileName: candidateForm.resumeFileName || 'Resume_Document.pdf',
-      resumeDataUrl: candidateForm.resumeDataUrl || null,
-      status: 'Pending',
-      appliedAt: new Date().toISOString()
-    };
+    if (isSubmitting) return;
+
+    if (!selectedFile) {
+      setErrorMsg('Please upload your resume file (PDF or DOCX format).');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setErrorMsg(null);
 
     try {
-      const existingApps = JSON.parse(localStorage.getItem('why_candidate_applications') || '[]');
-      localStorage.setItem('why_candidate_applications', JSON.stringify([newApp, ...existingApps]));
+      const formData = new FormData();
+      formData.append('name', candidateForm.name);
+      formData.append('email', candidateForm.email);
+      if (candidateForm.phone) formData.append('phone', candidateForm.phone);
+      if (candidateForm.experience) formData.append('experience', candidateForm.experience);
+      if (candidateForm.coverLetter) formData.append('coverLetter', candidateForm.coverLetter);
+      formData.append('resume', selectedFile);
 
-      const existingApplicants = JSON.parse(localStorage.getItem('why_careers_applicants') || '[]');
-      localStorage.setItem('why_careers_applicants', JSON.stringify([newApp, ...existingApplicants]));
+      const targetJobId = applyModalJob.id || applyModalJob.slug;
+      const response = await submitJobApplication(targetJobId, formData);
+
+      if (response && response.success) {
+        setAppRefId(response.applicationId || response.data?.refId || 'APP-' + Date.now());
+        setAppliedSuccess(true);
+      } else {
+        throw new Error('Unexpected server response format.');
+      }
     } catch (err) {
-      console.error('Failed to save application to storage:', err);
+      if (err.code === 'ALREADY_APPLIED' || err.status === 409) {
+        setErrorMsg('You have already submitted an application for this position using this email address.');
+      } else if (err.code === 'FILE_TOO_LARGE' || err.status === 413) {
+        setErrorMsg('The uploaded resume file exceeds the 5 MB limit. Please select a smaller file.');
+      } else if (err.code === 'INVALID_RESUME_FILE') {
+        setErrorMsg(err.message || 'Invalid resume file. Only valid PDF, DOC, or DOCX files are allowed.');
+      } else if (err.code === 'JOB_NOT_FOUND_OR_INACTIVE' || err.status === 404) {
+        setErrorMsg('This job position is no longer active or accepting applications.');
+      } else {
+        setErrorMsg(err.message || 'Failed to submit application. Please try again.');
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -150,7 +150,7 @@ export default function Careers() {
               alt="Careers at WHY IT Services"
               className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-700"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A]/80 via-transparent to-transparent flex flex-col justify-end p-6 text-white text-left">
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/70 to-transparent flex flex-col justify-end p-6 text-white text-left">
               <span className="text-[10px] font-mono text-purple-300 font-bold uppercase tracking-wider">Join Our Pods</span>
               <h3 className="text-base font-extrabold">High-Growth Technical Environment</h3>
             </div>
@@ -160,46 +160,69 @@ export default function Careers() {
         {/* OPEN POSITIONS GRID */}
         <div className="space-y-4 max-w-4xl mx-auto">
           <h2 className="text-xl font-extrabold text-[#0F172A] mb-4">Current Open Positions</h2>
-          {openPositions.map((pos) => (
-            <div key={pos.id} className="bg-white border border-[#E9D5FF] rounded-2xl p-6 shadow-sm hover:border-[#6D28D9] transition-all space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <span className="inline-block bg-[#F3E8FF] text-[#6D28D9] text-[10px] font-bold px-2.5 py-0.5 rounded mb-1">
-                    {pos.dept}
-                  </span>
-                  <h3 className="font-extrabold text-base text-[#0F172A]">{pos.title}</h3>
-                  <div className="text-xs text-slate-500 mt-1">{pos.type} • {pos.location}</div>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setSelectedJob(selectedJob?.id === pos.id ? null : pos)}
-                    className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-4 py-2 rounded-xl transition-all"
-                  >
-                    {selectedJob?.id === pos.id ? 'Hide Details' : 'View Job Description'}
-                  </button>
-                  <button
-                    onClick={() => { setApplyModalJob(pos); setAppliedSuccess(false); }}
-                    className="bg-[#6D28D9] hover:bg-[#5B21B6] text-white text-xs font-bold px-5 py-2 rounded-xl transition-all"
-                  >
-                    Apply Now
-                  </button>
-                </div>
-              </div>
 
-              {/* DETAILED JOB DESCRIPTION DROPDOWN */}
-              {selectedJob?.id === pos.id && (
-                <div className="pt-4 border-t border-slate-200/80 space-y-3 animate-in fade-in duration-150">
-                  <p className="text-xs text-slate-600 leading-relaxed">{pos.overview}</p>
+          {jobsLoading ? (
+            <div className="bg-white border border-[#E9D5FF] rounded-2xl p-12 text-center text-slate-500 text-xs">
+              Loading open engineering positions...
+            </div>
+          ) : jobsError ? (
+            <div className="bg-red-50 border border-red-200 text-red-700 rounded-2xl p-6 text-center text-xs font-semibold space-y-2">
+              <div>{jobsError}</div>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="bg-[#6D28D9] text-white px-4 py-1.5 rounded-lg text-xs font-bold"
+              >
+                Retry
+              </button>
+            </div>
+          ) : openPositions.length === 0 ? (
+            <div className="bg-white border border-[#E9D5FF] rounded-2xl p-12 text-center text-slate-500 text-xs font-medium">
+              No current openings at this time. Please check back later.
+            </div>
+          ) : (
+            openPositions.map((pos) => (
+              <div key={pos.id} className="bg-white border border-[#E9D5FF] rounded-2xl p-6 shadow-sm hover:border-[#6D28D9] transition-all space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <h4 className="text-xs font-bold text-[#0F172A] mb-1">Key Responsibilities:</h4>
-                    <ul className="list-disc list-inside space-y-1 text-xs text-slate-600">
-                      {pos.responsibilities.map((r, i) => <li key={i}>{r}</li>)}
-                    </ul>
+                    <span className="inline-block bg-[#F3E8FF] text-[#6D28D9] text-[10px] font-bold px-2.5 py-0.5 rounded mb-1">
+                      {pos.dept}
+                    </span>
+                    <h3 className="font-extrabold text-base text-[#0F172A]">{pos.title}</h3>
+                    <div className="text-xs text-slate-500 mt-1">{pos.type} • {pos.location}</div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setSelectedJob(selectedJob?.id === pos.id ? null : pos)}
+                      className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-4 py-2 rounded-xl transition-all"
+                    >
+                      {selectedJob?.id === pos.id ? 'Hide Details' : 'View Job Description'}
+                    </button>
+                    <button
+                      onClick={() => { setApplyModalJob(pos); setAppliedSuccess(false); setErrorMsg(null); }}
+                      className="bg-[#6D28D9] hover:bg-[#5B21B6] text-white text-xs font-bold px-5 py-2 rounded-xl transition-all"
+                    >
+                      Apply Now
+                    </button>
                   </div>
                 </div>
-              )}
-            </div>
-          ))}
+
+                {/* DETAILED JOB DESCRIPTION DROPDOWN */}
+                {selectedJob?.id === pos.id && (
+                  <div className="pt-4 border-t border-slate-200/80 space-y-3 animate-in fade-in duration-150">
+                    <p className="text-xs text-slate-600 leading-relaxed">{pos.overview}</p>
+                    {pos.responsibilities && pos.responsibilities.length > 0 && (
+                      <div>
+                        <h4 className="text-xs font-bold text-[#0F172A] mb-1">Key Responsibilities:</h4>
+                        <ul className="list-disc list-inside space-y-1 text-xs text-slate-600">
+                          {pos.responsibilities.map((r, i) => <li key={i}>{r}</li>)}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))
+          )}
         </div>
 
         {/* APPLICATION MODAL */}
@@ -241,6 +264,12 @@ export default function Careers() {
                   <form onSubmit={handleApplySubmit} className="space-y-3">
                     <div className="text-xs font-extrabold text-[#6D28D9]">Applying for: {applyModalJob.title}</div>
                     
+                    {errorMsg && (
+                      <div className="bg-red-50 border border-red-200 text-red-700 px-3.5 py-2.5 rounded-xl text-xs font-semibold">
+                        {errorMsg}
+                      </div>
+                    )}
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label className="block text-xs font-bold text-slate-700 mb-1">Full Name *</label>
@@ -284,8 +313,8 @@ export default function Careers() {
                       </div>
                     </div>
 
-                    <button type="submit" className="w-full bg-[#6D28D9] text-white font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider shadow-md hover:bg-[#5B21B6] transition-all">
-                      Submit Resume & Application
+                    <button type="submit" disabled={isSubmitting} className="w-full bg-[#6D28D9] hover:bg-[#5B21B6] disabled:opacity-50 text-white font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider shadow-md transition-all">
+                      {isSubmitting ? 'Submitting Application...' : 'Submit Resume & Application'}
                     </button>
                   </form>
                 )

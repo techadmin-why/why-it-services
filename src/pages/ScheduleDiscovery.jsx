@@ -1,49 +1,47 @@
 import React, { useState } from 'react';
 import { Calendar, Clock, CheckCircle2, ArrowRight, UserCheck } from 'lucide-react';
+import { submitDiscoveryRequest } from '../api/client';
 
 export default function ScheduleDiscovery() {
-  const [formData, setFormData] = useState({ name: '', email: '', company: '', pillar: 'Digital Strategy & Audits', date: '', timeSlot: '10:00 AM EST' });
+  const [formData, setFormData] = useState({ name: '', email: '', company: '', pillar: 'Digital Strategy & Audits', date: '', timeSlot: '10:00 AM EST (08:30 PM IST)' });
   const [booked, setBooked] = useState(false);
   const [refId, setRefId] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(null);
 
   const todayStr = new Date().toISOString().split('T')[0];
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const generatedRef = `WHY-DISC-${Math.floor(100000 + Math.random() * 900000)}`;
-    setRefId(generatedRef);
-    setBooked(true);
+    if (isSubmitting) return;
 
-    const bookingRecord = { 
-      ...formData, 
-      id: Date.now(), 
-      refId: generatedRef, 
-      status: 'Requested',
-      createdAt: new Date().toISOString() 
-    };
+    setIsSubmitting(true);
+    setErrorMsg(null);
 
-    // Save to discovery bookings key
     try {
-      const existing = JSON.parse(localStorage.getItem('why_discovery_bookings') || '[]');
-      localStorage.setItem('why_discovery_bookings', JSON.stringify([bookingRecord, ...existing]));
-
-      // Sync to main inquiries inbox for Admin visibility
-      const existingInquiries = JSON.parse(localStorage.getItem('why_inquiries') || '[]');
-      const inquiryRecord = {
-        id: Date.now(),
-        refId: generatedRef,
+      const response = await submitDiscoveryRequest({
         name: formData.name,
         email: formData.email,
         company: formData.company,
-        service: formData.pillar,
-        budget: 'Discovery Consultation',
-        message: `Discovery Call requested for ${formData.date} at ${formData.timeSlot}`,
-        status: 'New',
-        createdAt: new Date().toISOString()
-      };
-      localStorage.setItem('why_inquiries', JSON.stringify([inquiryRecord, ...existingInquiries]));
+        pillar: formData.pillar,
+        date: formData.date,
+        timeSlot: formData.timeSlot
+      });
+
+      if (response && response.success) {
+        setRefId(response.inquiryId || response.data?.refId || 'DISC-' + Date.now());
+        setBooked(true);
+      } else {
+        throw new Error('Unexpected response format from server.');
+      }
     } catch (err) {
-      console.error('Failed to save discovery booking:', err);
+      if (err.code === 'SLOT_ALREADY_BOOKED' || err.status === 409) {
+        setErrorMsg('This time slot is already booked for the selected date. Please choose another date or time slot.');
+      } else {
+        setErrorMsg(err.message || 'Failed to schedule discovery session. Please try again.');
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -74,6 +72,12 @@ export default function ScheduleDiscovery() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
+              {errorMsg && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-xs font-semibold">
+                  {errorMsg}
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Your Name *</label>
@@ -118,8 +122,9 @@ export default function ScheduleDiscovery() {
                 </div>
               </div>
 
-              <button type="submit" className="w-full bg-gradient-to-r from-[#6D28D9] to-[#5B21B6] text-white font-extrabold py-4 rounded-xl text-xs uppercase tracking-wider shadow-lg hover:from-[#5B21B6]">
-                Confirm Discovery Session -&gt;
+              <button type="submit" disabled={isSubmitting} className="w-full bg-gradient-to-r from-[#6D28D9] to-[#5B21B6] hover:from-[#5B21B6] hover:to-[#4C1D95] disabled:opacity-50 text-white font-extrabold py-3.5 px-6 rounded-xl text-xs sm:text-sm uppercase tracking-wider shadow-lg inline-flex items-center justify-center gap-2 whitespace-nowrap transition-all">
+                <span>{isSubmitting ? 'Booking Session...' : 'Confirm Discovery Session'}</span>
+                <ArrowRight className="w-4 h-4 shrink-0" />
               </button>
             </form>
           )}

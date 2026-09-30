@@ -2,12 +2,74 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Users, Code2, ShieldCheck, CheckCircle2, Sparkles, 
-  ArrowRight, Clock, DollarSign, Award, Check, X, Sliders
+  ArrowRight, Clock, DollarSign, Award, Check, X, Sliders, Send
 } from 'lucide-react';
+import { submitHiringRequest } from '../api/client';
 
 export default function HireDevelopers() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedDossier, setSelectedDossier] = useState(null);
+
+  // Hiring Request Modal State
+  const [isHiringModalOpen, setIsHiringModalOpen] = useState(false);
+  const [hiringSubmitted, setHiringSubmitted] = useState(false);
+  const [hiringRefId, setHiringRefId] = useState('');
+  const [isSubmittingHiring, setIsSubmittingHiring] = useState(false);
+  const [hiringErrorMsg, setHiringErrorMsg] = useState(null);
+
+  const [hiringForm, setHiringForm] = useState({
+    name: '',
+    email: '',
+    company: '',
+    phone: '',
+    roleNeeded: 'Senior Full Stack Engineer',
+    teamSize: '1-2 Developers',
+    commitment: 'Full-Time (160h/mo)',
+    message: ''
+  });
+
+  const openHiringModal = (role = '', commitment = '') => {
+    setHiringForm(prev => ({
+      ...prev,
+      roleNeeded: role || prev.roleNeeded,
+      commitment: commitment || prev.commitment
+    }));
+    setHiringSubmitted(false);
+    setHiringErrorMsg(null);
+    setIsHiringModalOpen(true);
+  };
+
+  const handleHiringSubmit = async (e) => {
+    e.preventDefault();
+    if (isSubmittingHiring) return;
+
+    setIsSubmittingHiring(true);
+    setHiringErrorMsg(null);
+
+    try {
+      const response = await submitHiringRequest({
+        name: hiringForm.name,
+        email: hiringForm.email,
+        company: hiringForm.company || null,
+        phone: hiringForm.phone || null,
+        roleNeeded: hiringForm.roleNeeded || null,
+        teamSize: hiringForm.teamSize || null,
+        commitment: hiringForm.commitment || null,
+        message: hiringForm.message
+      });
+
+      if (response && response.success) {
+        setHiringRefId(response.inquiryId || response.data?.refId || 'HIRE-' + Date.now());
+        setHiringSubmitted(true);
+      } else {
+        throw new Error('Unexpected server response format.');
+      }
+    } catch (err) {
+      setHiringErrorMsg(err.message || 'Failed to submit hiring request. Please try again.');
+    } finally {
+      setIsSubmittingHiring(false);
+    }
+  };
 
   const developerRoles = [
     { 
@@ -16,7 +78,6 @@ export default function HireDevelopers() {
       category: 'frontend', 
       exp: '5+ Years', 
       stack: 'React, Next.js, TypeScript, Tailwind, Redux', 
-      rate: '$25/hr',
       bio: 'Ex-Tier 1 tech lead specializing in server-side rendering, micro-frontends, and enterprise design systems with 99.9% uptime record.',
       tzMatch: 'EST / PST / CET / IST Compatible',
       milestones: ['Built 5M+ user SaaS web portal', 'Reduced web bundle size by 45%', '100% test coverage automation']
@@ -27,7 +88,6 @@ export default function HireDevelopers() {
       category: 'backend', 
       exp: '6+ Years', 
       stack: 'Node.js, Express, NestJS, PostgreSQL, Redis', 
-      rate: '$28/hr',
       bio: 'High-throughput event-driven microservices architect. Expert in distributed caching, Kafka event streaming, and SQL optimization.',
       tzMatch: 'EST / CET / IST Compatible',
       milestones: ['Scaled API to 50,000 req/sec', 'Zero-downtime database migration', 'SOC2 compliance auditor']
@@ -38,7 +98,6 @@ export default function HireDevelopers() {
       category: 'ai', 
       exp: '5+ Years', 
       stack: 'Python, FastAPI, LangChain, PyTorch, OpenAI API', 
-      rate: '$35/hr',
       bio: 'Generative AI developer building enterprise RAG pipelines, fine-tuned Llama models, vector search, and automated RPA workflows.',
       tzMatch: 'PST / EST / IST Compatible',
       milestones: ['Deployed custom RAG for Fortune 500', 'Automated document processing by 80%', 'PyTorch ML model optimization']
@@ -49,7 +108,6 @@ export default function HireDevelopers() {
       category: 'mobile', 
       exp: '4+ Years', 
       stack: 'Flutter, React Native, iOS, Android, Dart', 
-      rate: '$26/hr',
       bio: 'Cross-platform mobile apps lead with over 15 published Apps on App Store & Google Play store with offline telemetry capabilities.',
       tzMatch: 'EST / CET / IST Compatible',
       milestones: ['4.9 Stars average App Store rating', 'Integrated biometric security', 'Real-time WebSocket chat']
@@ -60,7 +118,6 @@ export default function HireDevelopers() {
       category: 'devops', 
       exp: '7+ Years', 
       stack: 'AWS, Kubernetes, Terraform, Docker, CI/CD', 
-      rate: '$32/hr',
       bio: 'AWS Certified Solutions Architect & Kubernetes administrator. Infrastructure as Code (IaC) specialist with zero-downtime deployment pipelines.',
       tzMatch: '24/7 On-Call Pod / EST / IST',
       milestones: ['Automated Terraform multi-cloud infra', 'Achieved 99.999% cloud uptime SLA', 'Reduced AWS monthly spend by 35%']
@@ -71,7 +128,6 @@ export default function HireDevelopers() {
       category: 'qa', 
       exp: '5+ Years', 
       stack: 'Selenium, Cypress, Playwright, Jest, Postman', 
-      rate: '$22/hr',
       bio: 'Full-stack QA Automation engineer creating robust E2E test suites, security regression tests, and continuous integration gate checks.',
       tzMatch: 'EST / PST / IST Compatible',
       milestones: ['Created 1,200+ automated test suites', 'Prevented 95+ critical release bugs', 'Automated API load testing']
@@ -112,13 +168,13 @@ export default function HireDevelopers() {
           </div>
         </div>
         <div className="flex flex-wrap items-center justify-center gap-4">
-          <Link
-            to="/contact"
+          <button
+            onClick={() => openHiringModal()}
             className="bg-[#6D28D9] hover:bg-[#5B21B6] text-white font-bold px-8 py-4 rounded-xl transition-all shadow-md hover:shadow-xl inline-flex items-center gap-2 text-sm"
           >
             <span>Hire Developers Now</span>
             <ArrowRight className="w-4 h-4" />
-          </Link>
+          </button>
           <a
             href="#comparison-matrix"
             className="bg-white border border-slate-200 text-slate-700 font-semibold px-8 py-4 rounded-xl hover:bg-slate-50 transition-all text-sm"
@@ -173,12 +229,12 @@ export default function HireDevelopers() {
                   ))}
                 </div>
               </div>
-              <Link
-                to="/contact"
+              <button
+                onClick={() => openHiringModal('', m.title)}
                 className="w-full bg-[#6D28D9] hover:bg-[#5B21B6] text-white text-xs font-bold py-3.5 rounded-xl text-center transition-all block shadow-sm"
               >
                 Inquire About {m.title}
-              </Link>
+              </button>
             </div>
           ))}
         </div>
@@ -239,7 +295,7 @@ export default function HireDevelopers() {
                   <p className="text-xs text-slate-500 mt-1">Tech Stack: <span className="font-mono text-slate-700">{role.stack}</span></p>
                 </div>
                 <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                  <span className="text-xs font-extrabold text-[#6D28D9]">Starting from {role.rate}</span>
+                  <span className="text-xs font-extrabold text-[#6D28D9]">Dedicated Senior Pod</span>
                   <button type="button" className="text-xs font-bold text-[#6D28D9] hover:underline flex items-center gap-1">
                     View Dossier & Book <ArrowRight className="w-3 h-3" />
                   </button>
@@ -271,7 +327,7 @@ export default function HireDevelopers() {
                 <span className="text-xs font-mono font-bold text-purple-600">{selectedDossier.id}</span>
               </div>
               <h3 className="text-2xl font-extrabold text-[#0F172A]">{selectedDossier.name}</h3>
-              <p className="text-xs font-semibold text-slate-500 mt-0.5">{selectedDossier.exp} Seniority • Rate: <span className="text-[#6D28D9] font-bold">{selectedDossier.rate}</span></p>
+              <p className="text-xs font-semibold text-slate-500 mt-0.5">{selectedDossier.exp} Seniority • <span className="text-[#6D28D9] font-bold">Immediate Pod Onboarding</span></p>
             </div>
 
             <div className="space-y-4 text-xs">
@@ -308,12 +364,16 @@ export default function HireDevelopers() {
             </div>
 
             <div className="flex items-center gap-3 pt-2">
-              <Link
-                to="/contact"
+              <button
+                onClick={() => {
+                  const roleName = selectedDossier.name;
+                  setSelectedDossier(null);
+                  openHiringModal(roleName);
+                }}
                 className="flex-1 bg-[#6D28D9] hover:bg-[#5B21B6] text-white font-bold text-xs py-3.5 rounded-xl text-center shadow-md transition-all"
               >
                 Schedule Candidate Interview
-              </Link>
+              </button>
               <button
                 onClick={() => setSelectedDossier(null)}
                 className="px-5 py-3.5 bg-slate-100 text-slate-700 font-bold text-xs rounded-xl hover:bg-slate-200 transition-colors"
@@ -400,14 +460,180 @@ export default function HireDevelopers() {
           <p className="text-purple-100 text-sm max-w-xl mx-auto mb-8">
             Schedule a 15-minute developer matching call with our technical leadership team today.
           </p>
-          <Link
-            to="/contact"
+          <button
+            onClick={() => openHiringModal()}
             className="bg-white hover:bg-purple-50 text-[#6D28D9] font-bold px-8 py-4 rounded-xl transition-all shadow-lg text-sm inline-block"
           >
             Schedule Interview Call
-          </Link>
+          </button>
         </div>
       </section>
+
+      {/* HIRING REQUEST MODAL */}
+      {isHiringModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white border border-[#E9D5FF] rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative overflow-hidden space-y-4">
+            
+            <button
+              onClick={() => { setIsHiringModalOpen(false); setHiringSubmitted(false); setHiringErrorMsg(null); }}
+              className="absolute top-5 right-5 text-slate-400 hover:text-[#6D28D9] bg-white border border-slate-200 rounded-full p-2 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {hiringSubmitted ? (
+              <div className="text-center py-8 space-y-4">
+                <div className="w-14 h-14 bg-[#F3E8FF] border border-[#E9D5FF] text-[#6D28D9] rounded-full flex items-center justify-center mx-auto">
+                  <CheckCircle2 className="w-8 h-8" />
+                </div>
+                {hiringRefId && (
+                  <span className="text-[11px] font-mono font-bold text-[#6D28D9] bg-[#F3E8FF] px-3 py-1 rounded-full border border-[#E9D5FF] uppercase inline-block">
+                    Request Ref: {hiringRefId}
+                  </span>
+                )}
+                <h3 className="text-2xl font-bold text-[#0F172A]">Hiring Request Received!</h3>
+                <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
+                  Thank you for submitting your developer hiring request to WHY IT Services. {hiringRefId && <span>Your reference code is <strong className="font-mono text-[#6D28D9]">{hiringRefId}</strong>. </span>}Our talent acquisition directors will review your scope and contact you within 24 hours.
+                </p>
+                <button
+                  onClick={() => setIsHiringModalOpen(false)}
+                  className="bg-[#6D28D9] text-white text-xs font-bold px-6 py-2.5 rounded-xl hover:bg-[#5B21B6] transition-all"
+                >
+                  Close Window
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleHiringSubmit} className="space-y-4">
+                <div className="border-b border-slate-200 pb-3">
+                  <div className="inline-flex items-center gap-1.5 bg-[#F3E8FF] border border-[#E9D5FF] text-[#6D28D9] px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider mb-1">
+                    <Users className="w-3 h-3" />
+                    Developer Hiring Intake
+                  </div>
+                  <h3 className="text-xl font-extrabold text-[#0F172A]">Hire Dedicated Engineers</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">Scale your squad with top 3% pre-vetted senior software talent.</p>
+                </div>
+
+                {hiringErrorMsg && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-3.5 py-2.5 rounded-xl text-xs font-semibold">
+                    {hiringErrorMsg}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">Full Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={hiringForm.name}
+                      onChange={e => setHiringForm({ ...hiringForm, name: e.target.value })}
+                      placeholder="Alex Morgan"
+                      className="w-full px-3.5 py-2.5 bg-[#FAFAFC] border border-slate-200 rounded-xl text-xs focus:border-[#6D28D9] outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">Work Email *</label>
+                    <input
+                      type="email"
+                      required
+                      value={hiringForm.email}
+                      onChange={e => setHiringForm({ ...hiringForm, email: e.target.value })}
+                      placeholder="alex@enterprise.com"
+                      className="w-full px-3.5 py-2.5 bg-[#FAFAFC] border border-slate-200 rounded-xl text-xs focus:border-[#6D28D9] outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">Company Name</label>
+                    <input
+                      type="text"
+                      value={hiringForm.company}
+                      onChange={e => setHiringForm({ ...hiringForm, company: e.target.value })}
+                      placeholder="Acme Global Inc"
+                      className="w-full px-3.5 py-2.5 bg-[#FAFAFC] border border-slate-200 rounded-xl text-xs focus:border-[#6D28D9] outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">Phone Number</label>
+                    <input
+                      type="text"
+                      value={hiringForm.phone}
+                      onChange={e => setHiringForm({ ...hiringForm, phone: e.target.value })}
+                      placeholder="+1 (555) 000-0000"
+                      className="w-full px-3.5 py-2.5 bg-[#FAFAFC] border border-slate-200 rounded-xl text-xs focus:border-[#6D28D9] outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">Role Needed</label>
+                    <select
+                      value={hiringForm.roleNeeded}
+                      onChange={e => setHiringForm({ ...hiringForm, roleNeeded: e.target.value })}
+                      className="w-full px-3 py-2.5 bg-[#FAFAFC] border border-slate-200 rounded-xl text-xs focus:border-[#6D28D9] outline-none"
+                    >
+                      <option value="Senior Full Stack Engineer">Full Stack React/Node</option>
+                      <option value="Python & AI / LLM Engineer">Python AI & LLM</option>
+                      <option value="Node.js Microservices Engineer">Node.js Backend</option>
+                      <option value="Flutter & Mobile Engineer">Mobile Cross-Platform</option>
+                      <option value="Cloud DevOps & SRE">Cloud DevOps & SRE</option>
+                      <option value="QA Automation Lead">QA Automation</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">Team Size</label>
+                    <select
+                      value={hiringForm.teamSize}
+                      onChange={e => setHiringForm({ ...hiringForm, teamSize: e.target.value })}
+                      className="w-full px-3 py-2.5 bg-[#FAFAFC] border border-slate-200 rounded-xl text-xs focus:border-[#6D28D9] outline-none"
+                    >
+                      <option value="1-2 Developers">1-2 Developers</option>
+                      <option value="3-5 Developers">3-5 Developers</option>
+                      <option value="Dedicated Pod (5+ Devs)">Dedicated Pod (5+)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">Commitment</label>
+                    <select
+                      value={hiringForm.commitment}
+                      onChange={e => setHiringForm({ ...hiringForm, commitment: e.target.value })}
+                      className="w-full px-3 py-2.5 bg-[#FAFAFC] border border-slate-200 rounded-xl text-xs focus:border-[#6D28D9] outline-none"
+                    >
+                      <option value="Full-Time (160h/mo)">Full-Time (160h/mo)</option>
+                      <option value="Part-Time (80h/mo)">Part-Time (80h/mo)</option>
+                      <option value="Hourly / On-Demand">Hourly / On-Demand</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">Hiring & Technical Requirements *</label>
+                  <textarea
+                    rows={3}
+                    required
+                    value={hiringForm.message}
+                    onChange={e => setHiringForm({ ...hiringForm, message: e.target.value })}
+                    placeholder="Describe your tech stack, estimated start date, timezone requirements, or project goals..."
+                    className="w-full p-3 bg-[#FAFAFC] border border-slate-200 rounded-xl text-xs focus:border-[#6D28D9] outline-none"
+                  ></textarea>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSubmittingHiring}
+                  className="w-full bg-[#6D28D9] hover:bg-[#5B21B6] disabled:opacity-50 text-white font-bold py-3.5 rounded-xl text-xs uppercase tracking-wider shadow-md transition-all flex items-center justify-center gap-2"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  {isSubmittingHiring ? 'Submitting Request...' : 'Submit Hiring Request'}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
 
     </div>
   );

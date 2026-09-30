@@ -1,47 +1,44 @@
 import React, { useState } from 'react';
 import { Sparkles, Calendar, Clock, MapPin, CheckCircle2, ArrowRight } from 'lucide-react';
 import PartnerTicker from '../components/PartnerTicker';
+import { submitEventRegistration } from '../api/client';
 
 export default function ReserveSpot() {
   const [formData, setFormData] = useState({ name: '', email: '', company: '', role: 'Executive' });
   const [submitted, setSubmitted] = useState(false);
   const [refId, setRefId] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const generatedRef = `WHY-EVT-${Math.floor(100000 + Math.random() * 900000)}`;
-    setRefId(generatedRef);
-    setSubmitted(true);
+    if (isSubmitting) return;
 
-    const eventRecord = {
-      ...formData,
-      id: Date.now(),
-      refId: generatedRef,
-      status: 'Registered',
-      date: new Date().toISOString()
-    };
+    setIsSubmitting(true);
+    setErrorMsg(null);
 
     try {
-      const existing = JSON.parse(localStorage.getItem('why_event_registrations') || '[]');
-      localStorage.setItem('why_event_registrations', JSON.stringify([eventRecord, ...existing]));
-
-      // Sync to main inquiries inbox for Admin visibility
-      const existingInquiries = JSON.parse(localStorage.getItem('why_inquiries') || '[]');
-      const inquiryRecord = {
-        id: Date.now(),
-        refId: generatedRef,
+      const response = await submitEventRegistration({
         name: formData.name,
         email: formData.email,
         company: formData.company,
-        service: 'Summit VIP Pass',
-        budget: 'Free Registration',
-        message: `Registered for WHY Digital Engineering Summit 2026 (Role: ${formData.role})`,
-        status: 'New',
-        createdAt: new Date().toISOString()
-      };
-      localStorage.setItem('why_inquiries', JSON.stringify([inquiryRecord, ...existingInquiries]));
+        eventSlug: 'summit-2026'
+      });
+
+      if (response && response.success) {
+        setRefId(response.inquiryId || response.data?.refId || 'EVT-' + Date.now());
+        setSubmitted(true);
+      } else {
+        throw new Error('Unexpected response format from server.');
+      }
     } catch (err) {
-      console.error('Failed to save event registration:', err);
+      if (err.code === 'ALREADY_REGISTERED' || err.status === 409) {
+        setErrorMsg('This email address is already registered for the WHY Digital Engineering Summit 2026.');
+      } else {
+        setErrorMsg(err.message || 'Failed to complete registration. Please try again.');
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -85,6 +82,13 @@ export default function ReserveSpot() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <h2 className="text-xl font-extrabold text-[#0F172A]">Attendee Registration</h2>
+
+              {errorMsg && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-xs font-semibold">
+                  {errorMsg}
+                </div>
+              )}
+
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">Full Name *</label>
                 <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full bg-[#FAFAFC] border border-[#E9D5FF] rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-[#6D28D9] outline-none" placeholder="Jane Doe" />
@@ -97,8 +101,8 @@ export default function ReserveSpot() {
                 <label className="block text-xs font-bold text-slate-700 mb-1">Company / Organization *</label>
                 <input required type="text" value={formData.company} onChange={e => setFormData({...formData, company: e.target.value})} className="w-full bg-[#FAFAFC] border border-[#E9D5FF] rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-[#6D28D9] outline-none" placeholder="Acme Global" />
               </div>
-              <button type="submit" className="w-full bg-gradient-to-r from-[#6D28D9] to-[#5B21B6] text-white font-extrabold py-3.5 rounded-xl text-xs uppercase tracking-wider shadow-md hover:from-[#5B21B6] hover:to-[#4C1D95]">
-                Confirm Free VIP Pass -&gt;
+              <button type="submit" disabled={isSubmitting} className="w-full bg-gradient-to-r from-[#6D28D9] to-[#5B21B6] disabled:opacity-50 text-white font-extrabold py-3.5 rounded-xl text-xs uppercase tracking-wider shadow-md hover:from-[#5B21B6] hover:to-[#4C1D95]">
+                {isSubmitting ? 'Registering...' : 'Confirm Free VIP Pass ->'}
               </button>
             </form>
           )}

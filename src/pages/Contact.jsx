@@ -5,6 +5,8 @@ import {
   Send, Sparkles, MessageSquare, Building2, User, Globe
 } from 'lucide-react';
 
+import { submitContactInquiry } from '../api/client';
+
 export default function Contact() {
   const location = useLocation();
   const preselectedData = location.state || {};
@@ -20,6 +22,8 @@ export default function Contact() {
 
   const [submitted, setSubmitted] = useState(false);
   const [refId, setRefId] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(null);
 
   useEffect(() => {
     if (preselectedData.serviceInterest || preselectedData.budget || preselectedData.notes) {
@@ -32,32 +36,34 @@ export default function Contact() {
     }
   }, [preselectedData]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const generatedRefId = `WHY-LEAD-${Math.floor(100000 + Math.random() * 900000)}`;
-    setRefId(generatedRefId);
+    if (isSubmitting) return;
 
-    const newInquiry = {
-      id: Date.now(),
-      refId: generatedRefId,
-      name: formData.fullName,
-      email: formData.email,
-      company: formData.company || 'N/A',
-      service: formData.serviceInterest,
-      budget: formData.budget,
-      message: formData.message,
-      status: 'New',
-      createdAt: new Date().toISOString()
-    };
+    setIsSubmitting(true);
+    setErrorMsg(null);
 
     try {
-      const existingInquiries = JSON.parse(localStorage.getItem('why_inquiries') || '[]');
-      localStorage.setItem('why_inquiries', JSON.stringify([newInquiry, ...existingInquiries]));
-    } catch (err) {
-      console.error('Failed to save inquiry to storage:', err);
-    }
+      const response = await submitContactInquiry({
+        name: formData.fullName,
+        email: formData.email,
+        company: formData.company || null,
+        serviceInterest: formData.serviceInterest || null,
+        budget: formData.budget || null,
+        message: formData.message
+      });
 
-    setSubmitted(true);
+      if (response && response.success) {
+        setRefId(response.inquiryId || response.data?.refId || 'INQ-' + Date.now());
+        setSubmitted(true);
+      } else {
+        throw new Error('Unexpected response format from server.');
+      }
+    } catch (err) {
+      setErrorMsg(err.message || 'Failed to submit inquiry. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -111,6 +117,12 @@ export default function Contact() {
                   <h2 className="text-2xl font-bold text-[#0F172A]">Project Intake Details</h2>
                   <p className="text-slate-500 text-xs mt-1">Fields marked with * are required.</p>
                 </div>
+
+                {errorMsg && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-xs font-semibold">
+                    {errorMsg}
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
@@ -199,10 +211,11 @@ export default function Contact() {
 
                 <button
                   type="submit"
-                  className="w-full bg-[#6D28D9] hover:bg-[#5B21B6] text-white font-bold py-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-sm"
+                  disabled={isSubmitting}
+                  className="w-full bg-[#6D28D9] hover:bg-[#5B21B6] disabled:opacity-50 text-white font-bold py-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-sm"
                 >
                   <Send className="w-4 h-4" />
-                  Submit Discovery Request
+                  {isSubmitting ? 'Submitting Discovery Request...' : 'Submit Discovery Request'}
                 </button>
               </form>
             )}
@@ -266,7 +279,7 @@ export default function Contact() {
                   <span className="font-semibold text-slate-800 group-hover:text-[#6D28D9]">thewhyservices.com</span>
                 </a>
                 <a 
-                  href="https://www.google.com/maps/search/?api=1&query=WHY+Services+India+Private+Limited+1st+Floor+No+14/1+Balaji+Krupa+2nd+Main+Road+Seshadripuram+Bengaluru+560020"
+                  href="https://maps.app.goo.gl/TBWPpqZDwFBvMyF98"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-start gap-3.5 hover:text-[#6D28D9] transition-colors group pt-1"

@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
 import { FileText, X, Send, CheckCircle2, Sparkles, ShieldCheck } from 'lucide-react';
+import { submitRfp } from '../api/client';
 
 export default function RfpModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [refId, setRefId] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(null);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -13,9 +18,34 @@ export default function RfpModal() {
     rfpDetails: ''
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    setErrorMsg(null);
+
+    try {
+      const response = await submitRfp({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || null,
+        projectType: formData.projectType || null,
+        budget: formData.budget || null,
+        rfpDetails: formData.rfpDetails
+      });
+
+      if (response && response.success && response.data) {
+        setRefId(response.data.refId);
+        setSubmitted(true);
+      } else {
+        throw new Error('Unexpected server response format.');
+      }
+    } catch (err) {
+      setErrorMsg(err.message || 'Failed to submit proposal. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -40,7 +70,7 @@ export default function RfpModal() {
             
             {/* Close Button */}
             <button
-              onClick={() => { setIsOpen(false); setSubmitted(false); }}
+              onClick={() => { setIsOpen(false); setSubmitted(false); setErrorMsg(null); }}
               className="absolute top-5 right-5 text-slate-400 hover:text-[#6D28D9] bg-white border border-slate-200 rounded-full p-2 transition-colors"
             >
               <X className="w-4 h-4" />
@@ -51,9 +81,14 @@ export default function RfpModal() {
                 <div className="w-14 h-14 bg-[#F3E8FF] border border-[#E9D5FF] text-[#6D28D9] rounded-full flex items-center justify-center mx-auto">
                   <CheckCircle2 className="w-8 h-8" />
                 </div>
+                {refId && (
+                  <span className="text-[11px] font-mono font-bold text-[#6D28D9] bg-[#F3E8FF] px-3 py-1 rounded-full border border-[#E9D5FF] uppercase inline-block">
+                    Ref ID: {refId}
+                  </span>
+                )}
                 <h3 className="text-2xl font-bold text-[#0F172A]">RFP Received!</h3>
                 <p className="text-xs text-slate-600 max-w-md mx-auto">
-                  Thank you for submitting your Request for Proposal to WHY IT Services. Our solution architects will review your document and respond within 24 hours.
+                  Thank you for submitting your Request for Proposal to WHY IT Services. {refId && <span>Your reference ID is <strong className="font-mono text-[#6D28D9]">{refId}</strong>. </span>}Our solution architects will review your document and respond within 24 hours.
                 </p>
                 <button
                   onClick={() => setIsOpen(false)}
@@ -72,6 +107,12 @@ export default function RfpModal() {
                   <h3 className="text-xl font-extrabold text-[#0F172A]">Submit Your Project RFP</h3>
                   <p className="text-xs text-slate-500 mt-0.5">Direct intake for enterprise software, data lakes, and IT staffing requirements.</p>
                 </div>
+
+                {errorMsg && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-3.5 py-2.5 rounded-xl text-xs font-semibold">
+                    {errorMsg}
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
@@ -144,10 +185,11 @@ export default function RfpModal() {
                   </div>
                   <button
                     type="submit"
-                    className="bg-[#6D28D9] hover:bg-[#5B21B6] text-white text-xs font-bold px-6 py-3 rounded-xl shadow-md transition-all flex items-center gap-1.5"
+                    disabled={isSubmitting}
+                    className="bg-[#6D28D9] hover:bg-[#5B21B6] disabled:opacity-50 text-white text-xs font-bold px-6 py-3 rounded-xl shadow-md transition-all flex items-center gap-1.5"
                   >
                     <Send className="w-3.5 h-3.5" />
-                    Submit Proposal
+                    {isSubmitting ? 'Submitting Proposal...' : 'Submit Proposal'}
                   </button>
                 </div>
               </form>

@@ -10,14 +10,6 @@
       "framework": "express"
     }
   },
-  "bindings": [
-    {
-      "type": "service",
-      "service": "server",
-      "format": "url",
-      "env": "VERCEL_SERVER_URL"
-    }
-  ],
   "rewrites": [
     {
       "source": "/api/(.*)",
